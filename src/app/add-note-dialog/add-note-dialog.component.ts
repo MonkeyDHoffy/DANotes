@@ -36,7 +36,7 @@ export class AddNoteDialogComponent {
       content: this.content,
       marked: false,
     };
-    this.noteService.addNote(note);
+    this.noteService.addNote(note, "Notes");
     this.addDialogClosed.emit(true);
     this.closeDialog();
 }

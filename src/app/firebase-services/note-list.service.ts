@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Note } from '../interfaces/note.interface';
-import { Firestore, collection, doc, collectionData, onSnapshot, addDoc, updateDoc  } from '@angular/fire/firestore';
+import { Firestore, collection, doc, collectionData, onSnapshot, addDoc, updateDoc, deleteDoc  } from '@angular/fire/firestore';
 import { AsyncPipe } from '@angular/common';
 // import { observable } from 'rxjs'; deprecated import removed
 
@@ -32,11 +32,24 @@ export class NoteListService {
     // });
   }
 
+
+ async deleteNote(coldID: "Notes" | "Trash", docID: string) {
+    if(docID){
+      try {
+        const docRef = this.getSingleDocRef(coldID, docID);
+        await deleteDoc(docRef);
+        console.log("Document deleted successfully");
+      } catch (err) {
+        console.error("Error deleting document:", err);
+      }
+    }
+  }
+
     async updateNote(note: Note) {
       if(note.id){
         let docRef = this.getSingleDocRef(this.getColIdFromNote(note), note.id);
-        await updateDoc(docRef, this.getCleanJson(note)).catch((err) => {console.error(err)}).then();}
-  }
+        await updateDoc(docRef, this.getCleanJson(note)).catch((err) => {console.log(err)}).then();
+  }}
 
   getCleanJson(note: Note){
     return {
@@ -56,16 +69,16 @@ export class NoteListService {
   }
 
 
-  async addNote(item: Note) {
-    await addDoc(this.getNotesRef(), item).catch(
-       (err)=> {console.error(err)}).then((docRef) => {console.log("Document written with ID:", docRef?.id);});
+  async addNote(item: Note, colID: "Notes" | "Trash") {
+    try {
+      const ref = colID === "Notes" ? this.getNotesRef() : this.getTrashRef();
+      const docRef = await addDoc(ref, item);
+      console.log("Document written with ID:", docRef.id);
+    } catch (err) {
+      console.error("Error adding document:", err);
+    }
   }
-
-
-
-
-    // const itemCollection = collection(this.firestore, 'items');
-
+    
     ngonDestroy() { 
       this.unsubNotes();
       this.unsubTrash();

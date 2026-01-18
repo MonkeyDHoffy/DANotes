@@ -38,15 +38,29 @@ export class NoteComponent {
   }
 
   moveToTrash(){
-    this.note.type = 'trash';
+    if(this.note.id) {
+      const docId = this.note.id;
+      this.note.type = 'trash';
+      this.note.id = '';  // statt delete this.note.id, da wir eine neue ID in der Trash Collection bekommen
+      this.noteService.addNote(this.note, 'Trash');
+      this.noteService.deleteNote('Notes', docId);
+    }
   }
 
   moveToNotes(){
-    this.note.type = 'note';
+    if(this.note.id) {
+      const docId = this.note.id;
+      this.note.type = 'note';
+      this.note.id = '';
+      this.noteService.addNote(this.note, 'Notes');
+      this.noteService.deleteNote('Trash', docId);
+    }
   }
 
   deleteNote(){
-
+    if(this.note.id) {
+      this.noteService.deleteNote('Trash', this.note.id);
+    }
   }
 
   saveNote(){
