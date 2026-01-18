@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Note } from '../interfaces/note.interface';
-import { Firestore, collection, doc, collectionData, onSnapshot,  } from '@angular/fire/firestore';
+import { Firestore, collection, doc, collectionData, onSnapshot, addDoc, updateDoc  } from '@angular/fire/firestore';
 import { AsyncPipe } from '@angular/common';
 // import { observable } from 'rxjs'; deprecated import removed
 
@@ -17,8 +17,8 @@ export class NoteListService {
   // items;
   // unsubList;
 
-  unsubTrash;
-  unsubNotes;
+  unsubTrash: () => void;
+  unsubNotes: () => void;
 
   constructor() {
     this.unsubTrash = this.subTrashList();
@@ -31,6 +31,37 @@ export class NoteListService {
     //   });
     // });
   }
+
+    async updateNote(note: Note) {
+      if(note.id){
+        let docRef = this.getSingleDocRef(this.getColIdFromNote(note), note.id);
+        await updateDoc(docRef, this.getCleanJson(note)).catch((err) => {console.error(err)}).then();}
+  }
+
+  getCleanJson(note: Note){
+    return {
+      type: note.type,
+      title: note.title,
+      content: note.content,
+      marked: note.marked,
+  }
+}
+
+  getColIdFromNote(note: Note){
+    if(note.type == 'note'){
+      return 'Notes';
+    } else {
+      return 'Trash';
+    }
+  }
+
+
+  async addNote(item: Note) {
+    await addDoc(this.getNotesRef(), item).catch(
+       (err)=> {console.error(err)}).then((docRef) => {console.log("Document written with ID:", docRef?.id);});
+  }
+
+
 
 
     // const itemCollection = collection(this.firestore, 'items');
