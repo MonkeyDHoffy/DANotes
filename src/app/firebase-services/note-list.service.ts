@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Note } from '../interfaces/note.interface';
-import { Firestore, collection, doc, collectionData, onSnapshot, addDoc, updateDoc, deleteDoc  } from '@angular/fire/firestore';
+import { Firestore, collection, doc, collectionData, onSnapshot, addDoc, updateDoc, deleteDoc, orderBy, query, limit, where  } from '@angular/fire/firestore';
 import { AsyncPipe } from '@angular/common';
 // import { observable } from 'rxjs'; deprecated import removed
 
@@ -95,13 +95,26 @@ export class NoteListService {
     }
 
     subNotesList(){
-       return onSnapshot(this.getNotesRef(), (list) => {
+      const q = query(this.getNotesRef(),limit(100));
+       return onSnapshot(q, (list) => {
         this.normalNotes = [];
       list.forEach(element => {
         this.normalNotes.push(this.setNoteObject(element.data(), element.id));
       });
     });
     }
+
+    
+    // subMarkedNotesList(){
+    //   const q = query(this.getNotesRef(),where("", "==", true), limit(100), orderBy("title"));
+    //    return onSnapshot(q, (list) => {
+    //     this.normalNotes = [];
+    //   list.forEach(element => {
+    //     this.normalNotes.push(this.setNoteObject(element.data(), element.id));
+    //   });
+
+    // });
+    // }
 
     setNoteObject(obj: any, id: string): Note {
       return {
